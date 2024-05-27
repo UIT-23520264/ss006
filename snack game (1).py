@@ -20,6 +20,11 @@ blue = pygame.Color(0, 0, 255)
 # khai bao pygame
 pygame.init()
 
+start_bg = transform.scale(image.load('start_bg.png'), (window_x, window_y))
+end_bg = transform.scale(image.load('end.jpg'), (window_x, window_y))
+start_sound = pygame.mixer.Sound('start_sound.mp3')
+eat_sound = pygame.mixer.Sound('eat.mp3')
+end_sound = pygame.mixer.Sound('end_sound.wav.mp3')
 # khai bao game window
 pygame.display.set_caption('Snacks Game')
 game_window = pygame.display.set_mode((window_x, window_y))
@@ -92,28 +97,57 @@ def show_score(choice, color, font, size):
     # displaying text
     game_window.blit(score_surface, score_rect)
  
-#  losing condition
 def game_over():
-    # set font chu va size 
-    my_font = pygame.font.SysFont('times new roman', 50)
-    # Hien thi so diem
-    game_over_surface = my_font.render(
-        'Your Score is : ' + str(score), True, red)
-    # tao khung cho chu
-    game_over_rect = game_over_surface.get_rect()
-    # vi tri cua chu
-    game_over_rect.midtop = (window_x/2, window_y/4)
-    # hien thi chu ra man hinh
-    game_window.blit(game_over_surface, game_over_rect)
-    pygame.display.flip()
-    # sau khi thua chuong trinh close trong 2 giay
-    time.sleep(2)
-    # vo hieu hoa pygame
-    pygame.quit()
-    quit()
- 
- 
+    # Gọi hàm end_game
+    end_game()
+
+# Hàm bắt đầu trò chơi
+def start_game():
+    start_sound.play()
+    while True:
+        game_window.blit(start_bg,(0,0))
+        font = pygame.font.SysFont('times new roman', 50)
+        welcome_surface = font.render('Welcome to Snake Game', True, white)
+        instruction_surface = font.render('Press SPACE to start', True, white)
+        welcome_rect = welcome_surface.get_rect()
+        instruction_rect = instruction_surface.get_rect()
+        welcome_rect.midtop = (window_x / 2, window_y / 4)
+        instruction_rect.midtop = (window_x / 2, window_y / 2)
+        game_window.blit(welcome_surface, welcome_rect)
+        game_window.blit(instruction_surface, instruction_rect)
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    start_sound.stop()
+                    return
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+# Hàm kết thúc trò chơi
+def end_game():
+    end_sound.play()
+    while True:
+        game_window.blit(end_bg,(0,0))
+        font = pygame.font.SysFont('times new roman', 50)
+        game_over_surface = font.render('Your Score is : ' + str(score), True, red)
+        instruction_surface = font.render('Press ESC to quit', True, white)
+        game_over_rect = game_over_surface.get_rect()
+        instruction_rect = instruction_surface.get_rect()
+        game_over_rect.midtop = (window_x / 2, window_y / 4)
+        instruction_rect.midtop = (window_x / 2, window_y / 2)
+        game_window.blit(game_over_surface, game_over_rect)
+        game_window.blit(instruction_surface, instruction_rect)
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    end_sound.stop()
+                    pygame.quit()
+                    quit()
 #  main function
+start_game()
 while True:
      
     # ham set key dieu khien con ran
@@ -152,6 +186,7 @@ while True:
     snake_body.insert(0, list(snake_position))
     if snake_position[0] == fruit_position[0] and snake_position[1] == fruit_position[1]:
         score += 10
+        eat_sound.play()
         fruit_spawn = False
     else:
         snake_body.pop()
